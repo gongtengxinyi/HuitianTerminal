@@ -11,8 +11,8 @@ import java.util.Map;
  * Created by dingjianlei on 2017/9/21.
  */
 public class HttpService {
-    public static boolean checkNameAndPass(String username, String password) {
-
+    public static String checkNameAndPass(String username, String password) {
+                 String data="";
         /**
          * 构造参数列表
          */
@@ -20,13 +20,13 @@ public class HttpService {
             Map<String, String> paraMap = new HashMap<String, String>();
             paraMap.put("username", username);
             paraMap.put("password", password);
-            String data = HttpClientUtil.doPost(ConstantsURL.URL, paraMap);
+            data = HttpClientUtil.doPost(ConstantsURL.URL, paraMap);
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return data;
         } finally {
         }
-        return true;
+        return data;
     }
 
     /**

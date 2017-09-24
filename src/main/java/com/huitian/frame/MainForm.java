@@ -1,18 +1,31 @@
 package com.huitian.frame;
 
+import com.huitian.constants.CacheConstants;
 import com.huitian.constants.ConstantsURL;
+import com.huitian.constants.EnumMessageMode;
+import com.huitian.constants.HuitianResult;
+import com.huitian.pojo.ChatMessage;
+import com.huitian.util.JsonUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import javax.swing.*;
-import java.awt.event.WindowAdapter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static com.huitian.frame.MainWindow.frame;
 
 /**
  * 主面板的各种字段定义
  * Created by dingjianlei on 2017/9/21.
  */
 public class MainForm {
+    private HuitianResult huitianResult;
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
     private JTable workingtable;
@@ -88,41 +101,113 @@ public class MainForm {
     private JLabel sendtotalindent;
     private WebSocketClient webSocketClient;
 
-    public MainForm() {
+    //构造函数用来传值链接websocket
+    public MainForm(HuitianResult huitianResult) {
+        this.huitianResult = huitianResult;
         try {
             String id = "";
-            webSocketClient = this.connectWebsocket(id);
+            if (huitianResult != null) {
+                LinkedHashMap LinkedHashMap = (LinkedHashMap) huitianResult.getData();
+                if (LinkedHashMap != null) {
+                    id = (String) LinkedHashMap.get("id");
+                    CacheConstants.centerAccountId = id;
+                }
+            }
+            webSocketClient = connectWebsocket(id);
             webSocketClient.connect();
+            initListener();
+            checkConnectOnline();
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame,
+                    "未连接到服务器websocket，无法接收订单，请检查网络链接~", "Sorry~", JOptionPane.WARNING_MESSAGE);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 检查心跳，如果断开重新链接
+     */
+    public void checkConnectOnline() {
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    ChatMessage chatMessage = createChatMessage(EnumMessageMode.HEART_BREAK.name());
+                    String lowDpiKey = JsonUtils.objectToJson(chatMessage);
+                    webSocketClient.send(lowDpiKey);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(frame,
+                            "网络状态不稳定，正在进行重新链接~", "Sorry~", JOptionPane.WARNING_MESSAGE);
+                    webSocketClient = connectWebsocket(CacheConstants.centerAccountId);
+                    webSocketClient.connect();
+                    e.printStackTrace();
+                }
+            }
+        };
+        ScheduledExecutorService service = Executors
+                .newSingleThreadScheduledExecutor();
+        // 第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间
+        service.scheduleAtFixedRate(runnable, 10, 10, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 初始化各种监听事件
+     */
+    private void initListener() {
+        //点击开始按钮触发的事件
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ChatMessage chatMessage = createChatMessage(EnumMessageMode.START_MACHINE.name());
+                String lowDpiKey = JsonUtils.objectToJson(chatMessage);
+                webSocketClient.send(lowDpiKey);
+            }
+        });
+        //点击停止按钮触发的事件
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ChatMessage chatMessage = createChatMessage(EnumMessageMode.STOP_MACHINE.name());
+                String lowDpiKey = JsonUtils.objectToJson(chatMessage);
+                webSocketClient.send(lowDpiKey);
+            }
+        });
+
+    }
+
+    private ChatMessage createChatMessage(String MessageMode) {
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setMessageMode(MessageMode);
+        chatMessage.setMessage(CacheConstants.centerAccountId);
+        return chatMessage;
+    }
+
+    public MainForm() {
+
+
     }
 
     public WebSocketClient connectWebsocket(final String centerAccountId) {
         WebSocketClient WebSocketClient = null;
         try {
-            String websockerUrl = String.format("%s?USERID=%s&TERMINALTYPE=PC", ConstantsURL.WEBSOCKET_ADDRESS,
+            String websockerUrl = String.format("%s?CENTERACCOUNTID=%s&TERMINALTYPE=PC", ConstantsURL.WEBSOCKET_ADDRESS,
                     centerAccountId);
             URI uri = new URI(websockerUrl);
             WebSocketClient = new WebSocketClient(uri) {
                 public void onMessage(String message) {
-                    if (message != null) {
-                        System.out.println(message);
-                        try {
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    try {
+                        if (message != null) {
+                            System.out.println(message);
                         }
 
-                    }
-                    try {
                     } catch (Exception e) {
-                        // TODO: handle exception
+                        e.printStackTrace();
                     }
+
                 }
 
 
                 public void onOpen(ServerHandshake handshake) {
-                    System.out.println("onopen");
+                    System.out.println("窗体初始化，websocket连接成功 onopen");
                 }
 
 
@@ -135,9 +220,8 @@ public class MainForm {
                     System.out.println("onerror");
                 }
             };
-            System.out.println("窗体初始化，websocket连接成功");
+
             return WebSocketClient;
-            // MainFrame.indentTalk(id,indent,userName,websocketSession);
         } catch (Exception e2) {
             // TODO: handle exception
             return WebSocketClient;
@@ -727,6 +811,22 @@ public class MainForm {
 
     public void setSendtotalindent(JLabel sendtotalindent) {
         this.sendtotalindent = sendtotalindent;
+    }
+
+    public HuitianResult getHuitianResult() {
+        return huitianResult;
+    }
+
+    public void setHuitianResult(HuitianResult huitianResult) {
+        this.huitianResult = huitianResult;
+    }
+
+    public WebSocketClient getWebSocketClient() {
+        return webSocketClient;
+    }
+
+    public void setWebSocketClient(WebSocketClient webSocketClient) {
+        this.webSocketClient = webSocketClient;
     }
 
     private void createUIComponents() {

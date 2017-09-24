@@ -1,26 +1,19 @@
 package com.huitian.frame;
 
-import com.bulenkov.iconloader.util.StringUtil;
 import com.huitian.constants.ConstantsUI;
-import com.huitian.constants.ConstantsURL;
+import com.huitian.constants.HttpResponseStatus;
+import com.huitian.constants.HuitianResult;
 import com.huitian.service.HttpService;
-import com.huitian.util.HttpClientUtil;
+import com.huitian.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 /**
- *
- *
  * Created by dingjianelei on 2017/9/20.
- *
  */
 public class LoginFrame {
     private JPanel panel1;
@@ -39,6 +32,7 @@ public class LoginFrame {
     private static JFrame frame;
 
     public LoginFrame() {
+        //登录button添加登录事件
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -50,58 +44,107 @@ public class LoginFrame {
                             "用户名或者密码不能为空~", "Sorry~", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                //发送请求验证身份了
-                if (checkInfo()) {
-                    JOptionPane.showMessageDialog(frame,
-                            "用户名或者密码错误，请重试~", "Sorry~", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
+                initWaitFrame(frame);
                 //如果断网的话给他提示
                 if (!checkInternet()) {
                     JOptionPane.showMessageDialog(frame,
                             "请检查网络状态~", "Sorry~", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                //关闭当前窗口，并不是真正关闭，释放资源了，后期需要查资料
-                frame.dispose();
-                //创建等待登录窗体...
-                final JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
-                frame.setIconImage(ConstantsUI.IMAGE_ICON);//设置小图标
-                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
-                frame.setBounds((int) (screenSize.width * 0.4), (int) (screenSize.height * 0.2), (int) (screenSize.width * 0.26),
-                        (int) (screenSize.height * 0.55));
+                //远程发送请求检查用户名或者密码对不对
+                String data = checkInfo();
+                HuitianResult huitianResult = JsonUtils.jsonToPojo(data, HuitianResult.class);
+                //密码错误
+                if (huitianResult.getStatus().equals(HttpResponseStatus.NO_USER)) {
+                    JOptionPane.showMessageDialog(frame,
+                            huitianResult.getMsg(), "Sorry~", JOptionPane.WARNING_MESSAGE);
+                    frame.dispose();
+                    initLoginFrame();
 
-                Dimension preferSize = new Dimension((int) (screenSize.width * 0.26),
-                        (int) (screenSize.height * 0.55));
-                frame.setPreferredSize(preferSize);
-                WaitFrame waitFrame = new WaitFrame();
-                //等待登录界面添加点击事件
-                waitFrame.getLogincencelButton().addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        frame.dispose();
-                        initLoginFrame();
+                    return;
+                }
+                //服务器异常
+                if (huitianResult.getStatus().equals(HttpResponseStatus.ERROR)) {
 
-                    }
-                });
-                /**
-                 * 添加事件
-                 */
-                waitFrame.getTestButton().addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        frame.dispose();
-                        initTerminalForTest();
-                    }
-                });
-                frame.setContentPane(waitFrame.getWaitpanel());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setVisible(true);
+                    JOptionPane.showMessageDialog(frame,
+                            huitianResult.getMsg(), "Sorry~", JOptionPane.WARNING_MESSAGE);
+                    frame.dispose();
+                    initLoginFrame();
+                    return;
+                }
+                //正确登录
+                if (huitianResult.getStatus().equals(HttpResponseStatus.SUCCESS)) {
+                    frame.dispose();
+                    initMainFrame(huitianResult);
 
+                }
 
             }
         });
+    }
+
+    private void initWaitFrame(JFrame iframe) {
+        try {
+            //关闭当前窗口，并不是真正关闭，释放资源了，后期需要查资料
+            iframe.dispose();
+            //创建等待登录窗体...
+            final JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
+            frame.setIconImage(ConstantsUI.IMAGE_ICON);//设置小图标
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+            frame.setBounds((int) (screenSize.width * 0.4), (int) (screenSize.height * 0.2), (int) (screenSize.width * 0.26),
+                    (int) (screenSize.height * 0.55));
+
+            Dimension preferSize = new Dimension((int) (screenSize.width * 0.26),
+                    (int) (screenSize.height * 0.55));
+            frame.setPreferredSize(preferSize);
+            WaitFrame waitFrame = new WaitFrame();
+            //等待登录界面添加点击事件
+            waitFrame.getLogincencelButton().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    frame.dispose();
+                    initLoginFrame();
+
+                }
+            });
+            /**
+             * 添加事件
+             */
+            waitFrame.getTestButton().addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    frame.dispose();
+                    initTerminalForTest();
+                }
+            });
+            frame.setContentPane(waitFrame.getWaitpanel());
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+        } catch (HeadlessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 登录成功之后，服务器返回centreaccountid作为websocket推送的账号id
+     */
+
+    public static void initMainFrame(HuitianResult huitianResult) {
+        MainForm mainForm = new MainForm(huitianResult);
+        JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
+        frame.setIconImage(ConstantsUI.IMAGE_ICON);//设置小图标
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+        frame.setBounds((int) (screenSize.width * 0.25), (int) (screenSize.height * 0.2), (int) (screenSize.width * 0.5),
+                (int) (screenSize.height * 0.7));
+
+        Dimension preferSize = new Dimension((int) (screenSize.width * 0.5),
+                (int) (screenSize.height * 0.7));
+        frame.setPreferredSize(preferSize);
+        frame.setContentPane(mainForm.getPanel1());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     /**
@@ -154,7 +197,7 @@ public class LoginFrame {
      *
      * @return
      */
-    private boolean checkInfo() {
+    private String checkInfo() {
         String username = usernametext.getText();
         String password = new String(passwordtext.getPassword());
         return HttpService.checkNameAndPass(username, password);
