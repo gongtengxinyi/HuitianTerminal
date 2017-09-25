@@ -44,13 +44,16 @@ public class LoginFrame {
                             "用户名或者密码不能为空~", "Sorry~", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                initWaitFrame(frame);
+                //创建等待窗体
+               JFrame waitFrame =  initWaitFrame(frame);
                 //如果断网的话给他提示
                 if (!checkInternet()) {
+                    waitFrame.dispose();
                     JOptionPane.showMessageDialog(frame,
                             "请检查网络状态~", "Sorry~", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+
                 //远程发送请求检查用户名或者密码对不对
                 String data = checkInfo();
                 HuitianResult huitianResult = JsonUtils.jsonToPojo(data, HuitianResult.class);
@@ -58,7 +61,7 @@ public class LoginFrame {
                 if (huitianResult.getStatus().equals(HttpResponseStatus.NO_USER)) {
                     JOptionPane.showMessageDialog(frame,
                             huitianResult.getMsg(), "Sorry~", JOptionPane.WARNING_MESSAGE);
-                    frame.dispose();
+                    waitFrame.dispose();
                     initLoginFrame();
 
                     return;
@@ -68,13 +71,13 @@ public class LoginFrame {
 
                     JOptionPane.showMessageDialog(frame,
                             huitianResult.getMsg(), "Sorry~", JOptionPane.WARNING_MESSAGE);
-                    frame.dispose();
+                    waitFrame.dispose();
                     initLoginFrame();
                     return;
                 }
                 //正确登录
                 if (huitianResult.getStatus().equals(HttpResponseStatus.SUCCESS)) {
-                    frame.dispose();
+                    waitFrame.dispose();
                     initMainFrame(huitianResult);
 
                 }
@@ -83,12 +86,12 @@ public class LoginFrame {
         });
     }
 
-    private void initWaitFrame(JFrame iframe) {
+    private JFrame initWaitFrame(JFrame iframe) {
+        final JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
         try {
             //关闭当前窗口，并不是真正关闭，释放资源了，后期需要查资料
             iframe.dispose();
             //创建等待登录窗体...
-            final JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
             frame.setIconImage(ConstantsUI.IMAGE_ICON);//设置小图标
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
             frame.setBounds((int) (screenSize.width * 0.4), (int) (screenSize.height * 0.2), (int) (screenSize.width * 0.26),
@@ -98,7 +101,7 @@ public class LoginFrame {
                     (int) (screenSize.height * 0.55));
             frame.setPreferredSize(preferSize);
             WaitFrame waitFrame = new WaitFrame();
-            //等待登录界面添加点击事件
+            //等待登录界面添加取消点击事件
             waitFrame.getLogincencelButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -124,6 +127,7 @@ public class LoginFrame {
         } catch (HeadlessException e) {
             e.printStackTrace();
         }
+        return frame;
     }
 
     /**

@@ -8,7 +8,11 @@ public class ConstantsURL {
     /**
      * 登陆获取接口的url地址
      */
-    public static final String URL = "http://localhost:9999/wapi/huitianterminal/login";
+    public static final String LOGIN_URL = "http://localhost:1080/wapi/huitianterminal/login";
+    /**
+     * 修改密码的url
+     */
+    public static final String MOTIFYPASSWORD_URL = "http://localhost:1080/wapi/huitianterminal/motifyPassword";
     /**
      * 测试网络状态 此处先用百度 ，以后改用wapi接口测试
      */
@@ -16,5 +20,5 @@ public class ConstantsURL {
     /**
      * 远程rest风格接口列表
      */
-    public  static  final  String WEBSOCKET_ADDRESS="ws://localhost:8888/chat/chatServer";
+    public  static  final  String WEBSOCKET_ADDRESS="ws://localhost:1080/chat/chatServer";
 }

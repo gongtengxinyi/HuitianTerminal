@@ -13,4 +13,6 @@ public class HttpResponseStatus {
     public static Integer ERROR   =  500;
     //没有该用户吗
     public static Integer NO_USER   = 201;
+    //修改密码失败
+    public static Integer MOTIFYPASSWORD_ERROR=202;
 }

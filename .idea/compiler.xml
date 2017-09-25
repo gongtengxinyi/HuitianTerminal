@@ -9,23 +9,8 @@
         <module name="HuitianTerminal" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="HuitianTerminal" target="1.7" />
-      <module name="installer" target="1.7" />
-      <module name="installer-api" target="1.7" />
-      <module name="installer-chat" target="1.7" />
-      <module name="installer-dto" target="1.7" />
-      <module name="installer-impl" target="1.7" />
-      <module name="installer-repo" target="1.7" />
-      <module name="installer-wapi" target="1.7" />
-      <module name="installer-web" target="1.7" />
-      <module name="installer-wechat" target="1.7" />
-      <module name="shared-api" target="1.7" />
-      <module name="shared-context" target="1.7" />
-      <module name="shared-dto" target="1.7" />
-      <module name="shared-impl" target="1.7" />
-      <module name="shared-repo" target="1.7" />
-      <module name="shared-util" target="1.7" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="HuitianTerminal" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

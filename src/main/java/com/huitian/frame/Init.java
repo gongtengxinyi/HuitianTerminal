@@ -2,6 +2,7 @@ package com.huitian.frame;
 
 import com.alee.laf.WebLookAndFeel;
 import com.huitian.constants.ConstantsUI;
+import com.huitian.util.FileUtil;
 import com.sun.java.swing.plaf.motif.MotifLookAndFeel;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +33,8 @@ public class Init {
      * 设置全局字体
      */
     public static void initGlobalFont() {
+        //修改默认路径
+        FileUtil.changeDir();
         String lowDpiKey = "lowDpiInit";
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
         if (screenSize.width <= 1366 && StringUtils.isEmpty(configer.getProps(lowDpiKey))) {

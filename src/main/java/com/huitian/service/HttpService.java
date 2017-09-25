@@ -11,6 +11,31 @@ import java.util.Map;
  * Created by dingjianlei on 2017/9/21.
  */
 public class HttpService {
+
+    /**
+     * 修改密码
+     * @param centerAccountId
+     * @param password
+     * @return
+     */
+    public static String motifyPassword(String centerAccountId, String password) {
+        String data="";
+        /**
+         * 构造参数列表
+         */
+        try {
+            Map<String, String> paraMap = new HashMap<String, String>();
+            paraMap.put("centerAccountId", centerAccountId);
+            paraMap.put("password", password);
+            data = HttpClientUtil.doPost(ConstantsURL.MOTIFYPASSWORD_URL, paraMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return data;
+        } finally {
+        }
+        return data;
+    }
+
     public static String checkNameAndPass(String username, String password) {
                  String data="";
         /**
@@ -20,7 +45,7 @@ public class HttpService {
             Map<String, String> paraMap = new HashMap<String, String>();
             paraMap.put("username", username);
             paraMap.put("password", password);
-            data = HttpClientUtil.doPost(ConstantsURL.URL, paraMap);
+            data = HttpClientUtil.doPost(ConstantsURL.LOGIN_URL, paraMap);
         } catch (Exception e) {
             e.printStackTrace();
             return data;

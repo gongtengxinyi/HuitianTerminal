@@ -1,17 +1,22 @@
 package com.huitian.frame;
 
-import com.huitian.constants.CacheConstants;
-import com.huitian.constants.ConstantsURL;
-import com.huitian.constants.EnumMessageMode;
-import com.huitian.constants.HuitianResult;
+import com.huitian.constants.*;
 import com.huitian.pojo.ChatMessage;
+import com.huitian.service.HttpService;
+import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.Executors;
@@ -119,9 +124,13 @@ public class MainForm {
             checkConnectOnline();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame,
-                    "未连接到服务器websocket，无法接收订单，请检查网络链接~", "Sorry~", JOptionPane.WARNING_MESSAGE);
+                    "未连接到服务器websocket，无法接收订单，请检查网络链接~,重新启动软件尝试", "Sorry~", JOptionPane.WARNING_MESSAGE);
             e.printStackTrace();
         }
+    }
+
+    public MainForm() {
+        initListener();
     }
 
     /**
@@ -137,8 +146,8 @@ public class MainForm {
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(frame,
                             "网络状态不稳定，正在进行重新链接~", "Sorry~", JOptionPane.WARNING_MESSAGE);
-                    webSocketClient = connectWebsocket(CacheConstants.centerAccountId);
-                    webSocketClient.connect();
+
+                    reconnectChat();
                     e.printStackTrace();
                 }
             }
@@ -150,10 +159,22 @@ public class MainForm {
     }
 
     /**
+     * 重连websocket
+     */
+    public void reconnectChat() {
+        try {
+            webSocketClient = connectWebsocket(CacheConstants.centerAccountId);
+            webSocketClient.connect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 初始化各种监听事件
      */
     private void initListener() {
-        //点击开始按钮触发的事件
+        //点击开始按加工钮触发的事件
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -162,7 +183,7 @@ public class MainForm {
                 webSocketClient.send(lowDpiKey);
             }
         });
-        //点击停止按钮触发的事件
+        //点击停止加工按钮触发的事件
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -171,19 +192,148 @@ public class MainForm {
                 webSocketClient.send(lowDpiKey);
             }
         });
+        //保存密码点击事件
+        saveuserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //true 是空 false  不是空
+                if (checkResetPasswordEmpty()) {
+                    JOptionPane.showMessageDialog(frame,
+                            "密码不能为空~~", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                if (!checkResetPasswordIfSame()) {
+                    JOptionPane.showMessageDialog(frame,
+                            "您输入的两次密码不一致，请重新确认输入~~", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                    newpasswordtext.setText("");
+                    confirmpasswordtext.setText("");
+                    return;
+                }
+                motifyPassword();
+
+
+            }
+        });
+        //保存文件点击事件
+        savefileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveFilePath();
+            }
+        });
+        //添加 tab 鼠标 点击监听事件
+        tabbedPane1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(MouseEvent e) { //响应鼠标点击事件
+                p(e);
+            }
+
+            private void p(MouseEvent e) {
+                for (int i = 0; i < tabbedPane1.getTabCount(); i++) {
+                    Rectangle rect = tabbedPane1.getBoundsAt(i); //拿到标签的边界
+                    if (rect.contains(e.getX(), e.getY())) { //判断是否点在边界内
+                        System.out.println("在选项卡" + i + "上点击了鼠标！"); //响应 简单输出一句话
+                        clickOnTab(i + 1);
+                    }
+                }
+            }
+        });
+    }
+
+    private void saveFilePath() {
+        CacheConstants.file_path = motifytext.getText();
+        if (FileUtil.changeDir()) {
+            JOptionPane.showMessageDialog(frame,
+                    "文件默认路径修改成功！！", "文件默认路径修改", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            String message = String.format("路径修改失败，现在路径是%s,请联系绘天科技咨询", CacheConstants.file_path);
+            JOptionPane.showMessageDialog(frame, message, "文件默认路径修改", JOptionPane.INFORMATION_MESSAGE);
+        }
 
     }
+
+    /**
+     * 发送HTTP请求 修改密码
+     */
+    private void motifyPassword() {
+        String data = HttpService.motifyPassword(CacheConstants.centerAccountId, newpasswordtext.getText());
+        HuitianResult huitianResult = JsonUtils.jsonToPojo(data, HuitianResult.class);
+        if (huitianResult.getStatus().equals(HttpResponseStatus.SUCCESS)) {
+            JOptionPane.showMessageDialog(frame,
+                    "密码修改成功！！", "密码修改", JOptionPane.INFORMATION_MESSAGE);
+        } else if (huitianResult.getStatus().equals(HttpResponseStatus.MOTIFYPASSWORD_ERROR)) {
+            JOptionPane.showMessageDialog(frame,
+                    "密码修改失败~~", "密码修改", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+    }
+
+    /**
+     * 检查两次密码是否是一直的
+     *
+     * @return
+     */
+    private boolean checkResetPasswordIfSame() {
+        boolean res = false;
+        try {
+            if (StringUtils.isNotBlank(newpasswordtext.getText().trim()) &&
+                    StringUtils.isNotBlank(confirmpasswordtext.getText().trim())) {
+                if (StringUtils.equals(newpasswordtext.getText().trim(), confirmpasswordtext.getText().trim())) {
+                    res = true;
+                    return res;
+                }
+
+            }
+        } catch (Exception e) {
+            res = false;
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * 检查重置密码是否是空
+     *
+     * @return
+     */
+    private boolean checkResetPasswordEmpty() {
+        if (StringUtils.isNotBlank(orgnalpasswordtext.getText().trim()) &&
+                StringUtils.isNotBlank(newpasswordtext.getText().trim()) &&
+                StringUtils.isNotBlank(confirmpasswordtext.getText().trim())) {
+            return false;
+
+        }
+        return true;
+
+    }
+
+    /**
+     * 响应tab上面的点击事件
+     *
+     * @param i
+     */
+    private void clickOnTab(int i) {
+        if (i == 1) {
+
+        } else if (i == 2) {
+
+        } else if (i == 3) {
+
+        } else if (i == 4) {
+
+        } else if (i == 5) {
+            //修改密码
+//            motifyPassword();
+            //设置文件默认路径
+            motifytext.setText(CacheConstants.file_path);
+        }
+    }
+
 
     private ChatMessage createChatMessage(String MessageMode) {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setMessageMode(MessageMode);
         chatMessage.setMessage(CacheConstants.centerAccountId);
         return chatMessage;
-    }
-
-    public MainForm() {
-
-
     }
 
     public WebSocketClient connectWebsocket(final String centerAccountId) {
