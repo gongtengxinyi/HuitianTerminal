@@ -2,7 +2,7 @@ package com.huitian.constants;
 
 /**
  * Created by Zlyj on 2017/9/21.
- * 丁建磊 add 的1
+ * 丁建磊 add test
  */
 public class ConstantsURL {
     /**
