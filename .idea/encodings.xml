@@ -2,5 +2,20 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-chat" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-dto" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-impl" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-repo" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-wapi" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-web" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-wechat" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-context" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-dto" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-impl" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-repo" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../huitian(2)/huitian/shared-util" charset="UTF-8" />
   </component>
 </project>

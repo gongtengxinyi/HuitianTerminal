@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-chat" />
+    <file type="web" url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-wapi" />
+    <file type="web" url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-web" />
+    <file type="web" url="file://$PROJECT_DIR$/../huitian(2)/huitian/installer-wechat" />
   </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-api/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-chat/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-dto/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-impl/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-repo/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-wapi/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-web/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/installer-wechat/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-api/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-context/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-dto/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-impl/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-repo/pom.xml" />
+        <option value="$PROJECT_DIR$/../huitian(2)/huitian/shared-util/pom.xml" />
+      </set>
+    </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
 </project>
