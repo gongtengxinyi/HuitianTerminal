@@ -8,11 +8,12 @@ package com.huitian.constants;
  */
 public class CacheConstants {
     //存储全局id
-    public static  String  centerAccountId="";
-    //存储默认文件存储路径
-    public static  String  file_path="D://huitian/";
+    public static String centerAccountId = "";
+    //存储默认文件存储路径setting.file.path
+    public static String file_path = "setting.file.path";
     //文件名字
-    public  static  String file_name="huitian";
+    public static String file_name = "huitian";
     //文件后缀
-    public  static  String file_suffix=".xml";
+    public static String file_suffix = ".xml";
+
 }

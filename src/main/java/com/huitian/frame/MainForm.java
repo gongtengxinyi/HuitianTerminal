@@ -10,20 +10,22 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.huitian.frame.MainWindow.frame;
+import static java.lang.Thread.sleep;
 
 /**
  * 主面板的各种字段定义
@@ -104,6 +106,8 @@ public class MainForm {
     private JLabel finishtotalindent;
     private JLabel sendtotallabel;
     private JLabel sendtotalindent;
+    private JScrollPane noworkeringscrollpane;
+    private JTable table2;
     private WebSocketClient webSocketClient;
 
     //构造函数用来传值链接websocket
@@ -120,7 +124,7 @@ public class MainForm {
             }
             webSocketClient = connectWebsocket(id);
             webSocketClient.connect();
-            initListener();
+            initListenerAndOther();
             checkConnectOnline();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame,
@@ -130,7 +134,8 @@ public class MainForm {
     }
 
     public MainForm() {
-        initListener();
+        initListenerAndOther();
+
     }
 
     /**
@@ -144,10 +149,27 @@ public class MainForm {
                     String lowDpiKey = JsonUtils.objectToJson(chatMessage);
                     webSocketClient.send(lowDpiKey);
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(frame,
-                            "网络状态不稳定，正在进行重新链接~", "Sorry~", JOptionPane.WARNING_MESSAGE);
-
+                    JOptionPane op = new JOptionPane("网络状态不稳定，正在进行重新链接~", JOptionPane.INFORMATION_MESSAGE);
+                    final JDialog dialog = op.createDialog("Sorry~");
+                    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                    dialog.setAlwaysOnTop(true);
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
                     reconnectChat();
+                    // 创建一个新计时器
+                    Timer timer = new Timer();
+
+                    // 30秒 后执行该任务
+                    timer.schedule(new TimerTask() {
+                        public void run() {
+                            dialog.setVisible(false);
+                            dialog.dispose();
+                        }
+                    }, 3000);
+//                    JOptionPane.showMessageDialog(frame,
+//                            "网络状态不稳定，正在进行重新链接~", "Sorry~", JOptionPane.CLOSED_OPTION);
+
+
                     e.printStackTrace();
                 }
             }
@@ -171,9 +193,22 @@ public class MainForm {
     }
 
     /**
-     * 初始化各种监听事件
+     * 初始化各种监听事件和初始化工作
      */
-    private void initListener() {
+    private void initListenerAndOther() {
+        // 设置滚动条速度
+        noworkeringscrollpane.getVerticalScrollBar().setUnitIncrement(15);
+        noworkeringscrollpane.getVerticalScrollBar().setDoubleBuffered(true);
+
+        //未加工首页按钮添加事件
+        shouyeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //根据传入的类型进行动态加载Jtable
+                tabDataForTest();
+//                clearAndGetData(new Filter("", ""));
+            }
+        });
         //点击开始按加工钮触发的事件
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -218,6 +253,7 @@ public class MainForm {
         savefileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 saveFilePath();
             }
         });
@@ -239,8 +275,56 @@ public class MainForm {
         });
     }
 
+    private void tabDataForTest() {
+
+        // 模板消息Data表
+        String[] headerNames = {"姓名", "手机号", "订单号", "详细"};
+        java.util.List<String[]> list = makeListForTest();
+        Object[][] cellData = new String[list.size()][headerNames.length];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
+        }
+//        DefaultTableModel model = new DefaultTableModel(cellData, headerNames);
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        noworkingtable.setModel(model);
+        noworkingtable.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        noworkingtable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        noworkingtable.getColumnModel().getColumn(0).setMaxWidth(100);
+        noworkingtable.setRowHeight(30);
+        noworkingtable.setRowMargin(5);
+        noworkingtable.getColumnModel().getColumn(1).setPreferredWidth(150);
+        noworkingtable.getColumnModel().getColumn(1).setMaxWidth(150);
+        noworkingtable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        noworkingtable.getColumnModel().getColumn(2).setMaxWidth(220);
+        noworkingtable.getColumnModel().getColumn(3).setPreferredWidth(130);
+        noworkingtable.getColumnModel().getColumn(3).setMaxWidth(130);
+        noworkingtable.updateUI();
+    }
+
+    private void clearAndGetData(Filter filter) {
+        String data = HttpService.tabGetDate(filter);
+    }
+
     private void saveFilePath() {
-        CacheConstants.file_path = motifytext.getText();
+        String text = motifytext.getText();
+        if (StringUtils.isBlank(text)) {
+            JOptionPane.showMessageDialog(frame,
+                    "文件默认路径不能为空！", "文件默认路径修改", JOptionPane.INFORMATION_MESSAGE);
+            if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
+                text = "D://huitian/";
+            } else {
+                text = Init.configer.getProps(CacheConstants.file_path);
+            }
+
+        } else {
+            Init.configer.setProps(CacheConstants.file_path, text);
+        }
+        Init.configer.save();
         if (FileUtil.changeDir()) {
             JOptionPane.showMessageDialog(frame,
                     "文件默认路径修改成功！！", "文件默认路径修改", JOptionPane.INFORMATION_MESSAGE);
@@ -315,7 +399,7 @@ public class MainForm {
         if (i == 1) {
 
         } else if (i == 2) {
-
+            initNoWorkIndent();
         } else if (i == 3) {
 
         } else if (i == 4) {
@@ -324,8 +408,76 @@ public class MainForm {
             //修改密码
 //            motifyPassword();
             //设置文件默认路径
-            motifytext.setText(CacheConstants.file_path);
+            String text="";
+            if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
+                text = "D://huitian/";
+            } else {
+                text = Init.configer.getProps(CacheConstants.file_path);
+            }
+            motifytext.setText(text);
         }
+    }
+
+    /**
+     * 初始化未加工订单列表
+     */
+    private void initNoWorkIndent() {
+        // 模板消息Data表
+        String[] headerNames = {"姓名", "手机号", "订单号", "详细"};
+        java.util.List<String[]> list = makeList();
+        Object[][] cellData = new String[list.size()][headerNames.length];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
+        }
+//        DefaultTableModel model = new DefaultTableModel(cellData, headerNames);
+        javax.swing.table.DefaultTableModel model = new javax.swing.table.DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        noworkingtable.setModel(model);
+        noworkingtable.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        noworkingtable.getColumnModel().getColumn(0).setPreferredWidth(100);
+        noworkingtable.getColumnModel().getColumn(0).setMaxWidth(100);
+        noworkingtable.setRowHeight(30);
+        noworkingtable.setRowMargin(5);
+        noworkingtable.getColumnModel().getColumn(1).setPreferredWidth(150);
+        noworkingtable.getColumnModel().getColumn(1).setMaxWidth(150);
+        noworkingtable.getColumnModel().getColumn(2).setPreferredWidth(220);
+        noworkingtable.getColumnModel().getColumn(2).setMaxWidth(220);
+        noworkingtable.getColumnModel().getColumn(3).setPreferredWidth(130);
+        noworkingtable.getColumnModel().getColumn(3).setMaxWidth(130);
+        noworkingtable.updateUI();
+
+    }
+
+    /**
+     * 制作list 填充表格
+     *
+     * @return
+     */
+    private List<String[]> makeList() {
+        String[] str = {"丁建磊", "13687672481", "adjkfjalksjdlkfjlasjka", "dd"};
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        for (int i = 0; i < 50; i++) {
+            list.add(str);
+        }
+        return list;
+    }
+
+    /**
+     * 制作list 填充表格
+     *
+     * @return
+     */
+    private List<String[]> makeListForTest() {
+        String[] str = {"王顺通", "21341", "sdafsdfasdgasdg", "rrrr"};
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        for (int i = 0; i < 50; i++) {
+            list.add(str);
+        }
+        return list;
     }
 
 
@@ -347,6 +499,7 @@ public class MainForm {
                     try {
                         if (message != null) {
                             System.out.println(message);
+                            parseMessage(message);
                         }
 
                     } catch (Exception e) {
@@ -357,12 +510,16 @@ public class MainForm {
 
 
                 public void onOpen(ServerHandshake handshake) {
-                    System.out.println("窗体初始化，websocket连接成功 onopen");
+
+                    System.out.println("窗体初始化，websocket连接成功 onopen"
+                    );
                 }
 
 
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("onclose");
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(code).append(reason).append(remote);
+                    System.out.println(sb.toString());
                 }
 
 
@@ -377,6 +534,27 @@ public class MainForm {
             return WebSocketClient;
         }
 
+    }
+
+    /**
+     * 处理服务器发送过来的消息体
+     *
+     * @param message
+     */
+
+    private void parseMessage(String message) {
+        try {
+            ChatMessage chatMessage = JsonUtils.jsonToPojo(message, ChatMessage.class);
+            if (chatMessage != null) {
+                if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.NO_INDENT.name())) {
+
+                } else if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.HAVE_INDENT.name())) {
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public JTabbedPane getTabbedPane1() {

@@ -19,16 +19,16 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Enumeration;
+import java.util.*;
 
 /**
  * dingjianlei 初始化的类
- *
  */
 public class Init {
 
     // 配置文件管理器对象
     public static Config configer = Config.getInstance();
+
     /**
      * 设置全局字体
      */
@@ -98,7 +98,7 @@ public class Init {
                     UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
             }
         } catch (Exception e) {
-           e.printStackTrace();
+            e.printStackTrace();
         }
 
     }
@@ -106,109 +106,110 @@ public class Init {
     /**
      * 初始化消息tab
      */
-//    public static void initMsgTab(boolean isInitFromHisComboxChang) {
-//                // 模板消息Data表
-//                String[] headerNames = {"Name", "Value", "Color", "操作"};
-//                Object[][] cellData = new String[list.size()][headerNames.length];
-//                for (int i = 0; i < list.size(); i++) {
-//                    cellData[i] = list.get(i);
-//                }
-//                DefaultTableModel model = new DefaultTableModel(cellData, headerNames);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().setModel(model);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().
-//                        getColumn(headerNames.length - 1).
-//                        setCellRenderer(new ButtonColumn(MainWindow.mainWindow.getTemplateMsgDataTable(), headerNames.length - 1));
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().
-//                        getColumn(headerNames.length - 1).
-//                        setCellEditor(new ButtonColumn(MainWindow.mainWindow.getTemplateMsgDataTable(), headerNames.length - 1));
-//
-//                // 设置列宽
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(0).setPreferredWidth(150);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(0).setMaxWidth(150);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(2).setPreferredWidth(130);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(2).setMaxWidth(130);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(3).setPreferredWidth(130);
-//                MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(3).setMaxWidth(130);
-//
-//                MainWindow.mainWindow.getTemplateMsgDataTable().updateUI();
-//            }
-//        }
-//    }
-
-
-    /**
-     * 自定义单元格按钮渲染器
-     */
-    public static class ButtonColumn extends AbstractCellEditor implements
-            TableCellRenderer, TableCellEditor, ActionListener {
-        JTable table;
-        JButton renderButton;
-        JButton editButton;
-
-        public ButtonColumn(JTable table, int column) {
-            super();
-            this.table = table;
-            renderButton = new JButton();
-            editButton = new JButton();
-            editButton.setFocusPainted(false);
-            editButton.addActionListener(this);
-
-            TableColumnModel columnModel = table.getColumnModel();
-            columnModel.getColumn(column).setCellRenderer(this);
-            columnModel.getColumn(column).setCellEditor(this);
+    public static void initMsgTab(boolean isInitFromHisComboxChang) {
+        // 模板消息Data表
+        String[] headerNames = {"Name", "Value", "Color", "操作"};
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        Object[][] cellData = new String[list.size()][headerNames.length];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
         }
+        DefaultTableModel model = new DefaultTableModel(cellData, headerNames);
+        MainWindow.mainWindow.getTemplateMsgDataTable().setModel(model);
+//        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().
+//                getColumn(headerNames.length - 1).
+//                setCellRenderer(new ButtonColumn(MainWindow.mainWindow.getTemplateMsgDataTable(), headerNames.length - 1));
+//        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().
+//                getColumn(headerNames.length - 1).
+//                setCellEditor(new ButtonColumn(MainWindow.mainWindow.getTemplateMsgDataTable(), headerNames.length - 1));
 
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            if (hasFocus) {
-                renderButton.setForeground(table.getForeground());
-                renderButton.setBackground(UIManager.getColor("Button.background"));
-            } else if (isSelected) {
-                renderButton.setForeground(table.getSelectionForeground());
-                renderButton.setBackground(table.getSelectionBackground());
-            } else {
-                renderButton.setForeground(table.getForeground());
-                renderButton.setBackground(UIManager.getColor("Button.background"));
-            }
+        // 设置列宽
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(0).setPreferredWidth(150);
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(0).setMaxWidth(150);
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(2).setPreferredWidth(130);
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(2).setMaxWidth(130);
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(3).setPreferredWidth(130);
+        MainWindow.mainWindow.getTemplateMsgDataTable().getColumnModel().getColumn(3).setMaxWidth(130);
 
-            renderButton.setText("移除");
-            renderButton.setIcon(new ImageIcon(getClass().getResource("/icon/remove.png")));
-            return renderButton;
-        }
-
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                     boolean isSelected, int row, int column) {
-            editButton.setText("移除");
-            editButton.setIcon(new ImageIcon(getClass().getResource("/icon/remove.png")));
-            return editButton;
-        }
-
-        public Object getCellEditorValue() {
-            return "移除";
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            int isDelete = JOptionPane.showConfirmDialog(MainWindow.mainWindow.getMessagePanel(), "确认移除？", "确认",
-                    JOptionPane.INFORMATION_MESSAGE);
-            if (isDelete == JOptionPane.YES_OPTION) {
-                fireEditingStopped();
-                DefaultTableModel model = (DefaultTableModel) table.getModel();
-                model.removeRow(table.getSelectedRow());
-            }
-        }
+        MainWindow.mainWindow.getTemplateMsgDataTable().updateUI();
     }
 
-    /**
-     * 自定义单元格单选框渲染器
-     */
-    public static class MyCheckBoxRenderer extends JCheckBox implements TableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            Boolean b = (Boolean) value;//这一列必须都是integer类型(0-100)
-            setSelected(b);
-            return this;
+
+
+
+/**
+ * 自定义单元格按钮渲染器
+ */
+public static class ButtonColumn extends AbstractCellEditor implements
+        TableCellRenderer, TableCellEditor, ActionListener {
+    JTable table;
+    JButton renderButton;
+    JButton editButton;
+
+    public ButtonColumn(JTable table, int column) {
+        super();
+        this.table = table;
+        renderButton = new JButton();
+        editButton = new JButton();
+        editButton.setFocusPainted(false);
+        editButton.addActionListener(this);
+
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(column).setCellRenderer(this);
+        columnModel.getColumn(column).setCellEditor(this);
+    }
+
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+        if (hasFocus) {
+            renderButton.setForeground(table.getForeground());
+            renderButton.setBackground(UIManager.getColor("Button.background"));
+        } else if (isSelected) {
+            renderButton.setForeground(table.getSelectionForeground());
+            renderButton.setBackground(table.getSelectionBackground());
+        } else {
+            renderButton.setForeground(table.getForeground());
+            renderButton.setBackground(UIManager.getColor("Button.background"));
+        }
+
+        renderButton.setText("移除");
+        renderButton.setIcon(new ImageIcon(getClass().getResource("/icon/remove.png")));
+        return renderButton;
+    }
+
+    public Component getTableCellEditorComponent(JTable table, Object value,
+                                                 boolean isSelected, int row, int column) {
+        editButton.setText("移除");
+        editButton.setIcon(new ImageIcon(getClass().getResource("/icon/remove.png")));
+        return editButton;
+    }
+
+    public Object getCellEditorValue() {
+        return "移除";
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        int isDelete = JOptionPane.showConfirmDialog(MainWindow.mainWindow.getMessagePanel(), "确认移除？", "确认",
+                JOptionPane.INFORMATION_MESSAGE);
+        if (isDelete == JOptionPane.YES_OPTION) {
+            fireEditingStopped();
+            DefaultTableModel model = (DefaultTableModel) table.getModel();
+            model.removeRow(table.getSelectedRow());
         }
     }
+}
+
+/**
+ * 自定义单元格单选框渲染器
+ */
+public static class MyCheckBoxRenderer extends JCheckBox implements TableCellRenderer {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+        Boolean b = (Boolean) value;//这一列必须都是integer类型(0-100)
+        setSelected(b);
+        return this;
+    }
+}
 
 }

@@ -1,7 +1,9 @@
 package com.huitian.service;
 
 import com.huitian.constants.ConstantsURL;
+import com.huitian.constants.Filter;
 import com.huitian.util.HttpClientUtil;
+import com.huitian.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -11,6 +13,30 @@ import java.util.Map;
  * Created by dingjianlei on 2017/9/21.
  */
 public class HttpService {
+
+
+
+    /**
+     * 修改密码
+     * @param filter
+     * @return
+     */
+    public static String tabGetDate(Filter filter) {
+        String data="";
+        /**
+         * 构造参数列表
+         */
+        try {
+            String param = JsonUtils.objectToJson(filter);
+            data = HttpClientUtil.doPostJson(ConstantsURL.TAB_DATA,param);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return data;
+        } finally {
+        }
+        return data;
+    }
+
 
     /**
      * 修改密码

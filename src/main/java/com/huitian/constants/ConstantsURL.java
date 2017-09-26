@@ -8,6 +8,10 @@ public class ConstantsURL {
     /**
      * 登陆获取接口的url地址
      */
+    public static final String TAB_DATA = "http://localhost:1080/wapi/huitianterminal/tabGetData";
+    /**
+     * 登陆获取接口的url地址
+     */
     public static final String LOGIN_URL = "http://localhost:1080/wapi/huitianterminal/login";
     /**
      * 修改密码的url
@@ -18,7 +22,7 @@ public class ConstantsURL {
      */
     public static final String TEST_URL = "http://www.baidu.com";
     /**
-     * 远程rest风格接口列表
+     * 远程rest
      */
     public  static  final  String WEBSOCKET_ADDRESS="ws://localhost:1080/chat/chatServer";
 }

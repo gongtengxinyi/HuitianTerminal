@@ -1,5 +1,6 @@
 package com.huitian.frame;
 
+import com.huitian.constants.CacheConstants;
 import com.huitian.constants.ConstantsUI;
 import com.huitian.constants.HttpResponseStatus;
 import com.huitian.constants.HuitianResult;
@@ -47,12 +48,12 @@ public class LoginFrame {
                 //创建等待窗体
                JFrame waitFrame =  initWaitFrame(frame);
                 //如果断网的话给他提示
-                if (!checkInternet()) {
-                    waitFrame.dispose();
-                    JOptionPane.showMessageDialog(frame,
-                            "请检查网络状态~", "Sorry~", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
+//                if (!checkInternet()) {
+//                    waitFrame.dispose();
+//                    JOptionPane.showMessageDialog(frame,
+//                            "请检查网络状态~", "Sorry~", JOptionPane.WARNING_MESSAGE);
+//                    return;
+//                }
 
                 //远程发送请求检查用户名或者密码对不对
                 String data = checkInfo();
@@ -102,6 +103,7 @@ public class LoginFrame {
             frame.setPreferredSize(preferSize);
             WaitFrame waitFrame = new WaitFrame();
             //等待登录界面添加取消点击事件
+            frame.setContentPane(waitFrame.getWaitpanel());
             waitFrame.getLogincencelButton().addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -159,6 +161,8 @@ public class LoginFrame {
         JFrame frame = new JFrame(ConstantsUI.APP_NAME + " " + ConstantsUI.APP_VERSION);
         frame.setIconImage(ConstantsUI.IMAGE_ICON);//设置小图标
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+
+
         frame.setBounds((int) (screenSize.width * 0.25), (int) (screenSize.height * 0.2), (int) (screenSize.width * 0.5),
                 (int) (screenSize.height * 0.7));
 

@@ -1,5 +1,6 @@
 package com.huitian.frame;
 
+import com.huitian.constants.CacheConstants;
 import com.xiaoleilu.hutool.setting.dialect.Props;
 
 import java.io.File;
@@ -70,6 +71,7 @@ public class Config {
         props.setProperty("setting.appearance.theme", "Darcula(推荐)");
         props.setProperty("setting.appearance.font", "Microsoft YaHei UI");
         props.setProperty("setting.appearance.fontSize", "18");
+        props.setProperty(CacheConstants.file_path,"D://huitian/");
         save();
     }
 

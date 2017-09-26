@@ -15,6 +15,7 @@ public enum EnumMessageMode{
   APP_PUSH_INDENT("接口推送订单"),
   WECHAT_PUSH_INDENT("微信推送订单"),
   NO_INDENT("没订单"),
+    HAVE_INDENT("有订单"),
 	;
 
 	private String text;
