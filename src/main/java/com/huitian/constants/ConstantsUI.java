@@ -25,6 +25,6 @@ public class ConstantsUI {
     /**
      * 首页正在加工订单的table预设大小
      */
-    public final static i PORTAL_TABLE_COL_WIDTH= ;
+    public final static int PORTAL_TABLE_COL_WIDTH=120;
 
 }
