@@ -22,5 +22,9 @@ public class ConstantsUI {
      * 主窗口图标
      */
     public final static Image IMAGE_ICON = Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/icon/logo-md.png"));
+    /**
+     * 首页正在加工订单的table预设大小
+     */
+    public final static i PORTAL_TABLE_COL_WIDTH= ;
 
 }
