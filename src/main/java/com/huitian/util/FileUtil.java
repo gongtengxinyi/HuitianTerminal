@@ -1,7 +1,6 @@
 package com.huitian.util;
 
 import com.huitian.constants.CacheConstants;
-import com.huitian.frame.Config;
 import com.huitian.frame.Init;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +22,7 @@ public class FileUtil {
                 filePath = Init.configer.getProps(CacheConstants.file_path);
             }
             Init.configer.save();
-            sb.append(filePath).append(CacheConstants.file_name).append(CacheConstants.file_suffix);
+            sb.append(filePath).append("/").append(CacheConstants.file_name).append(CacheConstants.file_suffix);
             File file = new File(sb.toString());
             File configDir = new File(filePath);
             if (!file.exists()) {

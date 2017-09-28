@@ -46,6 +46,7 @@ public class Init {
         Font fnt = new Font(configer.getFont(), Font.PLAIN, configer.getFontSize());
         FontUIResource fontRes = new FontUIResource(fnt);
         for (Enumeration keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
+
             Object key = keys.nextElement();
             Object value = UIManager.get(key);
             if (value instanceof FontUIResource)
