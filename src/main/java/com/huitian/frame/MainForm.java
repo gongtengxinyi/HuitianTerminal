@@ -5,6 +5,7 @@ import com.huitian.pojo.ChatMessage;
 import com.huitian.service.HttpService;
 import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -108,6 +109,7 @@ public class MainForm {
     private JLabel sendtotalindent;
     private JScrollPane noworkeringscrollpane;
     private JTable table2;
+    private JTable table3;
     private WebSocketClient webSocketClient;
 
     //构造函数用来传值链接websocket
@@ -275,6 +277,45 @@ public class MainForm {
         });
     }
 
+    private void initPortalNoWorkingTable() {
+        // 模板消息Data表
+        String[] headerNames = {"属性", "取值"};
+        java.util.List<String[]> list = makeListForPortalTest();
+        Object[][] cellData = new String[list.size()][2];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
+        }
+        DefaultTableModel model = new DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table3.setModel(model);
+        table3.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+        int width=screenSize.width/3;
+        table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        table3.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table3.setRowHeight(40);
+        table3.setRowMargin(10);
+        table3.updateUI();
+
+        DefaultTableModel model1 = new DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table2.setModel(model1);
+        table2.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table2.setRowHeight(40);
+        table2.setRowMargin(10);
+        table2.updateUI();
+    }
+
     private void tabDataForTest() {
 
         // 模板消息Data表
@@ -397,7 +438,7 @@ public class MainForm {
      */
     private void clickOnTab(int i) {
         if (i == 1) {
-
+            initPortalNoWorkingTable();
         } else if (i == 2) {
             initNoWorkIndent();
         } else if (i == 3) {
@@ -408,7 +449,7 @@ public class MainForm {
             //修改密码
 //            motifyPassword();
             //设置文件默认路径
-            String text="";
+            String text = "";
             if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
                 text = "D://huitian/";
             } else {
@@ -477,6 +518,31 @@ public class MainForm {
         for (int i = 0; i < 50; i++) {
             list.add(str);
         }
+        return list;
+    }
+
+    /**
+     * 制作list 填充表格
+     *
+     * @return
+     */
+    private List<String[]> makeListForPortalTest() {
+        String[] str = {"姓名", "丁建磊"};
+        String[] str1 = {"年龄", "13"};
+        String[] str2 = {"编号", "DCD3323"};
+        String[] str3 = {"手机", "1354444444"};
+        String[] str4 = {"姓名", "丁建磊"};
+        String[] str5 = {"姓名", "丁建磊"};
+
+
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        list.add(str);
+        list.add(str1);
+        list.add(str2);
+        list.add(str3);
+        list.add(str4);
+        list.add(str5);
+
         return list;
     }
 
