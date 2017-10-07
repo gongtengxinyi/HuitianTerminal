@@ -5,14 +5,12 @@ import com.huitian.pojo.ChatMessage;
 import com.huitian.service.HttpService;
 import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -207,8 +205,12 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //根据传入的类型进行动态加载Jtable
-                tabDataForTest();
-//                clearAndGetData(new Filter("", ""));
+                try {
+                    String data = clearAndGetData(new Filter(EnumFilterTab.NO_WORKING_TAB.name(), EnumFilterButtonType.SHOUYE_BUTTON.name()));
+                    noWorkingTabTableFilldata(data);//
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
             }
         });
         //点击开始按加工钮触发的事件
@@ -316,7 +318,9 @@ public class MainForm {
         table2.updateUI();
     }
 
-    private void tabDataForTest() {
+    private void noWorkingTabTableFilldata(String data) {
+
+
 
         // 模板消息Data表
         String[] headerNames = {"姓名", "手机号", "订单号", "详细"};
@@ -347,8 +351,10 @@ public class MainForm {
         noworkingtable.updateUI();
     }
 
-    private void clearAndGetData(Filter filter) {
+    private String  clearAndGetData(Filter filter) {
+
         String data = HttpService.tabGetDate(filter);
+        return data;
     }
 
     private void saveFilePath() {

@@ -6,7 +6,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 
 /**
- * UI相关的常量
+ * UI相关的常量是333
  */
 public class ConstantsUI {
 
