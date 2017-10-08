@@ -3,8 +3,10 @@ package com.huitian.frame;
 import com.huitian.constants.*;
 import com.huitian.pojo.ChatMessage;
 import com.huitian.service.HttpService;
+import com.huitian.util.AppendToFile;
 import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
+import com.huitian.util.ReadFromFile;
 import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -109,6 +111,8 @@ public class MainForm {
     private JTable table2;
     private JTable table3;
     private WebSocketClient webSocketClient;
+    private ScheduledExecutorService service1 = Executors.newSingleThreadScheduledExecutor();
+    ;
 
     //构造函数用来传值链接websocket
     public MainForm(HuitianResult huitianResult) {
@@ -200,19 +204,19 @@ public class MainForm {
         noworkeringscrollpane.getVerticalScrollBar().setUnitIncrement(15);
         noworkeringscrollpane.getVerticalScrollBar().setDoubleBuffered(true);
 
-        //未加工首页按钮添加事件
-        shouyeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //根据传入的类型进行动态加载Jtable
-                try {
-                    String data = clearAndGetData(new Filter(EnumFilterTab.NO_WORKING_TAB.name(), EnumFilterButtonType.SHOUYE_BUTTON.name()));
-                    noWorkingTabTableFilldata(data);//
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
+//        //未加工首页按钮添加事件
+//        shouyeButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                //根据传入的类型进行动态加载Jtable
+//                try {
+//                    String data = clearAndGetData(new Filter(EnumFilterTab.NO_WORKING_TAB.name(), EnumFilterButtonType.SHOUYE_BUTTON.name()));
+//                    noWorkingTabTableFilldata(data);//
+//                } catch (Exception e1) {
+//                    e1.printStackTrace();
+//                }
+//            }
+//        });
         //点击开始按加工钮触发的事件
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -220,15 +224,32 @@ public class MainForm {
                 ChatMessage chatMessage = createChatMessage(EnumMessageMode.START_MACHINE.name());
                 String lowDpiKey = JsonUtils.objectToJson(chatMessage);
                 webSocketClient.send(lowDpiKey);
+                startThreadFindSingleWork();
+                JOptionPane.showMessageDialog(frame,
+                        "开始加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                return;
             }
         });
         //点击停止加工按钮触发的事件
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ChatMessage chatMessage = createChatMessage(EnumMessageMode.STOP_MACHINE.name());
-                String lowDpiKey = JsonUtils.objectToJson(chatMessage);
-                webSocketClient.send(lowDpiKey);
+//                ChatMessage chatMessage = createChatMessage(EnumMessageMode.STOP_MACHINE.name());
+//                String lowDpiKey = JsonUtils.objectToJson(chatMessage);
+//                webSocketClient.send(lowDpiKey);
+
+                try {
+                    service1.shutdown();
+                    JOptionPane.showMessageDialog(frame,
+                            "停止加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                } catch (Exception e1) {
+
+                    e1.printStackTrace();
+                    JOptionPane.showMessageDialog(frame,
+                            "停止加工服务异常，请重启软件~~", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
             }
         });
         //保存密码点击事件
@@ -279,6 +300,28 @@ public class MainForm {
         });
     }
 
+    /**
+     * 点击开始加工按钮的时候开启一个线程进行扫描文件找到可以加工的信号时进行加工
+     */
+
+    private void startThreadFindSingleWork() {
+        Runnable runnable1 = new Runnable() {
+            public void run() {
+                String filename = "";
+                if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
+                    filename = CacheConstants.file_path_dafault;
+                } else {
+                    filename = Init.configer.getProps(CacheConstants.file_path);
+                }
+                filename = filename + "/" + CacheConstants.working_file;
+                ReadFromFile.readFileByLines(filename, webSocketClient);
+            }
+        };
+
+        // 第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间
+        service1.scheduleAtFixedRate(runnable1, 1, 10, TimeUnit.SECONDS);
+    }
+
     private void initPortalNoWorkingTable() {
         // 模板消息Data表
         String[] headerNames = {"属性", "取值"};
@@ -296,9 +339,9 @@ public class MainForm {
         table3.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
-        int width=screenSize.width/3;
+        int width = screenSize.width / 3;
         table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table3.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
         table3.setRowHeight(40);
         table3.setRowMargin(10);
         table3.updateUI();
@@ -312,14 +355,13 @@ public class MainForm {
         table2.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table2.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width * 2);
         table2.setRowHeight(40);
         table2.setRowMargin(10);
         table2.updateUI();
     }
 
     private void noWorkingTabTableFilldata(String data) {
-
 
 
         // 模板消息Data表
@@ -351,7 +393,7 @@ public class MainForm {
         noworkingtable.updateUI();
     }
 
-    private String  clearAndGetData(Filter filter) {
+    private String clearAndGetData(Filter filter) {
 
         String data = HttpService.tabGetDate(filter);
         return data;
@@ -363,7 +405,7 @@ public class MainForm {
             JOptionPane.showMessageDialog(frame,
                     "文件默认路径不能为空！", "文件默认路径修改", JOptionPane.INFORMATION_MESSAGE);
             if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
-                text = "D://huitian/";
+                text = CacheConstants.file_path_dafault;
             } else {
                 text = Init.configer.getProps(CacheConstants.file_path);
             }
@@ -444,7 +486,7 @@ public class MainForm {
      */
     private void clickOnTab(int i) {
         if (i == 1) {
-            initPortalNoWorkingTable();
+
         } else if (i == 2) {
             initNoWorkIndent();
         } else if (i == 3) {
@@ -457,7 +499,7 @@ public class MainForm {
             //设置文件默认路径
             String text = "";
             if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
-                text = "D://huitian/";
+                text = CacheConstants.file_path_dafault;
             } else {
                 text = Init.configer.getProps(CacheConstants.file_path);
             }
@@ -470,8 +512,8 @@ public class MainForm {
      */
     private void initNoWorkIndent() {
         // 模板消息Data表
-        String[] headerNames = {"姓名", "手机号", "订单号", "详细"};
-        java.util.List<String[]> list = makeList();
+        String[] headerNames = {"状态", "状态"};
+        java.util.List<String[]> list = makeListForPortalNoIndent();
         Object[][] cellData = new String[list.size()][headerNames.length];
         for (int i = 0; i < list.size(); i++) {
             cellData[i] = list.get(i);
@@ -532,6 +574,18 @@ public class MainForm {
      *
      * @return
      */
+    private List<String[]> makeListForPortalNoIndent() {
+        String[] str = {"状态", "当前没有订单！"};
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        list.add(str);
+        return list;
+    }
+
+    /**
+     * 制作list 填充表格
+     *
+     * @return
+     */
     private List<String[]> makeListForPortalTest() {
         String[] str = {"姓名", "丁建磊"};
         String[] str1 = {"年龄", "13"};
@@ -539,8 +593,6 @@ public class MainForm {
         String[] str3 = {"手机", "1354444444"};
         String[] str4 = {"姓名", "丁建磊"};
         String[] str5 = {"姓名", "丁建磊"};
-
-
         java.util.List<String[]> list = new ArrayList<String[]>();
         list.add(str);
         list.add(str1);
@@ -553,7 +605,7 @@ public class MainForm {
     }
 
 
-    private ChatMessage createChatMessage(String MessageMode) {
+    public static ChatMessage createChatMessage(String MessageMode) {
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setMessageMode(MessageMode);
         chatMessage.setMessage(CacheConstants.centerAccountId);
@@ -619,14 +671,78 @@ public class MainForm {
             ChatMessage chatMessage = JsonUtils.jsonToPojo(message, ChatMessage.class);
             if (chatMessage != null) {
                 if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.NO_INDENT.name())) {
+                    drawNoIndentView();
 
                 } else if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.HAVE_INDENT.name())) {
-
+                    initPortalNoWorkingTable();
+                    createWorkingFile(chatMessage);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 创建加工文件
+     *
+     * @param chatMessage
+     */
+    private void createWorkingFile(ChatMessage chatMessage) {
+        String filePath = "";
+
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
+            filePath = CacheConstants.file_path_dafault;
+        } else {
+            filePath = Init.configer.getProps(CacheConstants.file_path);
+        }
+        sb.append(filePath).append("/").append(CacheConstants.working_file);
+        ReadFromFile.clearInfoForFile(sb.toString());
+        String s = JsonUtils.objectToJson(chatMessage);
+        AppendToFile.appendMethodA(sb.toString(), s);
+    }
+
+    /**
+     * 如果收到服务器没有订单的推送时候显示在table里
+     */
+    private void drawNoIndentView() {
+        // 模板消息Data表
+        String[] headerNames = {"属性", "取值"};
+        java.util.List<String[]> list = makeListForPortalNoIndent();
+        Object[][] cellData = new String[list.size()][2];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
+        }
+        DefaultTableModel model = new DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table3.setModel(model);
+        table3.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+        int width = screenSize.width / 3;
+        table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+        table3.setRowHeight(40);
+        table3.setRowMargin(10);
+        table3.updateUI();
+
+        DefaultTableModel model1 = new DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        table2.setModel(model1);
+        table2.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+        table2.setRowHeight(40);
+        table2.setRowMargin(10);
+        table2.updateUI();
     }
 
     public JTabbedPane getTabbedPane1() {

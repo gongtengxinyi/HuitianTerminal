@@ -14,6 +14,11 @@ public class CacheConstants {
     //文件名字
     public static String file_name = "huitian";
     //文件后缀
-    public static String file_suffix = ".xml";
+    public static String file_suffix = ".txt";
+
+
+    public static String working_file = "work.txt";
+
+    public static String file_path_dafault ="D://huitian/";
 
 }

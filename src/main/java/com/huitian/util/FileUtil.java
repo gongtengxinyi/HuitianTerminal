@@ -17,7 +17,7 @@ public class FileUtil {
             String filePath = "";
             StringBuilder sb = new StringBuilder();
             if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
-                filePath = "D://huitian/";
+                filePath = CacheConstants.file_path_dafault;
             } else {
                 filePath = Init.configer.getProps(CacheConstants.file_path);
             }
