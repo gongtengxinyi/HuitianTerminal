@@ -24,7 +24,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.huitian.frame.MainWindow.frame;
-import static java.lang.Thread.sleep;
 
 /**
  * 主面板的各种字段定义
@@ -296,9 +295,9 @@ public class MainForm {
         table3.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
-        int width=screenSize.width/3;
+        int width = screenSize.width / 3;
         table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table3.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
         table3.setRowHeight(40);
         table3.setRowMargin(10);
         table3.updateUI();
@@ -312,14 +311,13 @@ public class MainForm {
         table2.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table2.getColumnModel().getColumn(0).setMaxWidth(width*2);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width * 2);
         table2.setRowHeight(40);
         table2.setRowMargin(10);
         table2.updateUI();
     }
 
     private void noWorkingTabTableFilldata(String data) {
-
 
 
         // 模板消息Data表
@@ -351,7 +349,7 @@ public class MainForm {
         noworkingtable.updateUI();
     }
 
-    private String  clearAndGetData(Filter filter) {
+    private String clearAndGetData(Filter filter) {
 
         String data = HttpService.tabGetDate(filter);
         return data;
