@@ -29,7 +29,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.huitian.frame.MainWindow.frame;
-import static java.lang.Thread.sleep;
 
 /**
  * 主面板的各种字段定义
