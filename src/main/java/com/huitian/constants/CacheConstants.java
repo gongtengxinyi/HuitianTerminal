@@ -12,13 +12,13 @@ public class CacheConstants {
     //存储默认文件存储路径setting.file.path
     public static String file_path = "setting.file.path";
     //文件名字
-    public static String file_name = "huitian";
+    public static String file_name = "huitianwork";
     //文件后缀
     public static String file_suffix = ".txt";
 
 
-    public static String working_file = "work.txt";
+    public static String judge_file = "huitianstatus.txt";
 
-    public static String file_path_dafault ="D://huitian/";
+    public static String file_path_dafault ="C://huitian/";
 
 }

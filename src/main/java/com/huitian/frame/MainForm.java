@@ -1,12 +1,14 @@
 package com.huitian.frame;
 
 import com.huitian.constants.*;
+import com.huitian.dto.IndentDto;
 import com.huitian.pojo.ChatMessage;
 import com.huitian.service.HttpService;
 import com.huitian.util.AppendToFile;
 import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
 import com.huitian.util.ReadFromFile;
+import com.xiaoleilu.hutool.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -18,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.nio.channels.NotYetConnectedException;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -111,8 +114,8 @@ public class MainForm {
     private JTable table2;
     private JTable table3;
     private WebSocketClient webSocketClient;
-    private ScheduledExecutorService service1 = Executors.newSingleThreadScheduledExecutor();
-    ;
+    private ScheduledExecutorService service1 = null;
+
 
     //构造函数用来传值链接websocket
     public MainForm(HuitianResult huitianResult) {
@@ -226,7 +229,7 @@ public class MainForm {
                 webSocketClient.send(lowDpiKey);
                 startThreadFindSingleWork();
                 JOptionPane.showMessageDialog(frame,
-                        "开始加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                        "开始加工！", "绘天科技", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
         });
@@ -239,7 +242,8 @@ public class MainForm {
 //                webSocketClient.send(lowDpiKey);
 
                 try {
-                    service1.shutdown();
+                    if (service1 != null)
+                        service1.shutdown();
                     JOptionPane.showMessageDialog(frame,
                             "停止加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
                     return;
@@ -313,19 +317,48 @@ public class MainForm {
                 } else {
                     filename = Init.configer.getProps(CacheConstants.file_path);
                 }
-                filename = filename + "/" + CacheConstants.working_file;
+                filename = filename + "/" + CacheConstants.judge_file;
                 ReadFromFile.readFileByLines(filename, webSocketClient);
             }
         };
-
+        service1 = Executors.newSingleThreadScheduledExecutor();
         // 第二个参数为首次执行的延时时间，第三个参数为定时执行的间隔时间
-        service1.scheduleAtFixedRate(runnable1, 1, 10, TimeUnit.SECONDS);
+        service1.scheduleAtFixedRate(runnable1, 1, 1, TimeUnit.SECONDS);
     }
 
-    private void initPortalNoWorkingTable() {
+    private void initPortalNoWorkingTable(ChatMessage chatMessage) {
         // 模板消息Data表
         String[] headerNames = {"属性", "取值"};
-        java.util.List<String[]> list = makeListForPortalTest();
+        java.util.List<String[]> list = new ArrayList<String[]>();
+        if (chatMessage != null) {
+            String indentDto = chatMessage.getMessage();
+            IndentDto indent = JsonUtils.jsonToPojo(indentDto, IndentDto.class);
+            try {
+                if (indent != null) {
+                    String name = indent.getReceiverName();
+                    String mobile = indent.getReceiverMobile();
+                    String indentId = indent.getIndentId();
+                    String picType = indent.getPicType();
+                    String picCode = indent.getPicCode();
+                    String piCount = indent.getPicCount();
+                    String[] str = {"姓名", name};
+                    String[] str1 = {"手机号", mobile};
+                    String[] str2 = {"订单编号", indentId};
+                    String[] str3 = {"图案类型", picType};
+                    String[] str4 = {"图案编码", picCode};
+                    String[] str5 = {"图案数量", piCount};
+                    list.add(str);
+                    list.add(str1);
+                    list.add(str2);
+                    list.add(str3);
+                    list.add(str4);
+                    list.add(str5);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Object[][] cellData = new String[list.size()][2];
         for (int i = 0; i < list.size(); i++) {
             cellData[i] = list.get(i);
@@ -335,17 +368,9 @@ public class MainForm {
                 return false;
             }
         };
-        table3.setModel(model);
-        table3.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
-        int width = screenSize.width / 3;
-        table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
-        table3.setRowHeight(40);
-        table3.setRowMargin(10);
-        table3.updateUI();
-
+        int width = screenSize.width / 2;
         DefaultTableModel model1 = new DefaultTableModel(cellData, headerNames) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -354,8 +379,10 @@ public class MainForm {
         table2.setModel(model1);
         table2.getTableHeader().setResizingAllowed(true);
         // 设置列宽
-        table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table2.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+        table2.getColumnModel().getColumn(0).setPreferredWidth(width - 30);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width - 30);
+        table2.getColumnModel().getColumn(1).setPreferredWidth(width - 30);
+        table2.getColumnModel().getColumn(1).setMaxWidth(width - 30);
         table2.setRowHeight(40);
         table2.setRowMargin(10);
         table2.updateUI();
@@ -488,7 +515,9 @@ public class MainForm {
         if (i == 1) {
 
         } else if (i == 2) {
-            initNoWorkIndent();
+            findHaveManyIndentAfter();
+//           initNoWorkIndent();
+
         } else if (i == 3) {
 
         } else if (i == 4) {
@@ -508,12 +537,26 @@ public class MainForm {
     }
 
     /**
+     * 向服务器发送请求，看有多少订单
+     */
+    private void findHaveManyIndentAfter() {
+        try {
+            ChatMessage chatMessage = createChatMessage(EnumMessageMode.CENTER_ALLINDENT.name());
+            String lowDpiKey = JsonUtils.objectToJson(chatMessage);
+            webSocketClient.send(lowDpiKey);
+        } catch (NotYetConnectedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 初始化未加工订单列表
      */
     private void initNoWorkIndent() {
         // 模板消息Data表
         String[] headerNames = {"状态", "状态"};
         java.util.List<String[]> list = makeListForPortalNoIndent();
+
         Object[][] cellData = new String[list.size()][headerNames.length];
         for (int i = 0; i < list.size(); i++) {
             cellData[i] = list.get(i);
@@ -533,10 +576,6 @@ public class MainForm {
         noworkingtable.setRowMargin(5);
         noworkingtable.getColumnModel().getColumn(1).setPreferredWidth(150);
         noworkingtable.getColumnModel().getColumn(1).setMaxWidth(150);
-        noworkingtable.getColumnModel().getColumn(2).setPreferredWidth(220);
-        noworkingtable.getColumnModel().getColumn(2).setMaxWidth(220);
-        noworkingtable.getColumnModel().getColumn(3).setPreferredWidth(130);
-        noworkingtable.getColumnModel().getColumn(3).setMaxWidth(130);
         noworkingtable.updateUI();
 
     }
@@ -578,29 +617,6 @@ public class MainForm {
         String[] str = {"状态", "当前没有订单！"};
         java.util.List<String[]> list = new ArrayList<String[]>();
         list.add(str);
-        return list;
-    }
-
-    /**
-     * 制作list 填充表格
-     *
-     * @return
-     */
-    private List<String[]> makeListForPortalTest() {
-        String[] str = {"姓名", "丁建磊"};
-        String[] str1 = {"年龄", "13"};
-        String[] str2 = {"编号", "DCD3323"};
-        String[] str3 = {"手机", "1354444444"};
-        String[] str4 = {"姓名", "丁建磊"};
-        String[] str5 = {"姓名", "丁建磊"};
-        java.util.List<String[]> list = new ArrayList<String[]>();
-        list.add(str);
-        list.add(str1);
-        list.add(str2);
-        list.add(str3);
-        list.add(str4);
-        list.add(str5);
-
         return list;
     }
 
@@ -674,13 +690,100 @@ public class MainForm {
                     drawNoIndentView();
 
                 } else if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.HAVE_INDENT.name())) {
-                    initPortalNoWorkingTable();
+                    initPortalNoWorkingTable(chatMessage);
                     createWorkingFile(chatMessage);
+                } else if (StringUtils.equals(chatMessage.getMessageMode(), EnumMessageMode.CENTER_QUEUE_ALLINDENT.name())) {
+                    dealWithCenterHaveManyAfterIndent(chatMessage);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 处理一个加工中心有多少个后续订单
+     *
+     * @param chatMessage
+     */
+    private void dealWithCenterHaveManyAfterIndent(ChatMessage chatMessage) {
+        if (chatMessage != null) {
+            String indentList = chatMessage.getIndentList();
+            if (StringUtils.isNotBlank(indentList)) {
+
+                List<IndentDto> indentDtos = null;
+                try {
+                    indentDtos = JsonUtils.jsonToList(indentList, IndentDto.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                initAfterIndentList(indentDtos);
+            }
+        }
+    }
+
+    /**
+     * 创造后续table还有多少订单的列表
+     *
+     * @param indentDtos
+     */
+
+    private void initAfterIndentList(List<IndentDto> indentDtos) {
+        if (indentDtos == null && indentDtos.size() < 1) {
+            initNoWorkIndent();
+            return;
+        }
+        // 模板消息Data表
+        String[] headerNames = {"业主姓名", "业主手机号", "订单id"};
+        java.util.List<String[]> list = new ArrayList<String[]>();
+
+        for (IndentDto indentDto : indentDtos) {
+            String[] str = {"", "", ""};
+            if (indentDto != null) {
+                String name = indentDto.getReceiverName();
+                String mobile = indentDto.getReceiverMobile();
+                String indentId = indentDto.getIndentId();
+                if (name == null) {
+                    name = " ";
+                }
+                if (mobile == null) {
+                    mobile = " ";
+                }
+                if (indentId == null) {
+                    indentId = " ";
+                }
+
+                str[0] = name;
+                str[1] = mobile;
+                str[2] = indentId;
+            }
+            list.add(str);
+        }
+        Object[][] cellData = new String[list.size()][3];
+        for (int i = 0; i < list.size(); i++) {
+            cellData[i] = list.get(i);
+        }
+        DefaultTableModel model = new DefaultTableModel(cellData, headerNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        noworkingtable.setModel(model);
+        noworkingtable.getTableHeader().setResizingAllowed(true);
+        // 设置列宽
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
+        int width = screenSize.width / 3;
+        noworkingtable.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        noworkingtable.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+        noworkingtable.getColumnModel().getColumn(1).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        noworkingtable.getColumnModel().getColumn(1).setMaxWidth(width * 2);
+        noworkingtable.getColumnModel().getColumn(2).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+        noworkingtable.getColumnModel().getColumn(2).setMaxWidth(width * 2);
+
+        noworkingtable.setRowHeight(40);
+        noworkingtable.setRowMargin(10);
+        noworkingtable.updateUI();
     }
 
     /**
@@ -697,7 +800,7 @@ public class MainForm {
         } else {
             filePath = Init.configer.getProps(CacheConstants.file_path);
         }
-        sb.append(filePath).append("/").append(CacheConstants.working_file);
+        sb.append(filePath).append("/").append(CacheConstants.file_name).append(CacheConstants.file_suffix);
         ReadFromFile.clearInfoForFile(sb.toString());
         String s = JsonUtils.objectToJson(chatMessage);
         AppendToFile.appendMethodA(sb.toString(), s);
@@ -708,6 +811,7 @@ public class MainForm {
      */
     private void drawNoIndentView() {
         // 模板消息Data表
+
         String[] headerNames = {"属性", "取值"};
         java.util.List<String[]> list = makeListForPortalNoIndent();
         Object[][] cellData = new String[list.size()][2];
