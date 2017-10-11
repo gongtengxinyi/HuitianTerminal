@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import static com.huitian.frame.MainWindow.frame;
 
 /**
- * 主面板的各种字段定义
+ * 主面板的各种字段定义222
  * Created by dingjianlei on 2017/9/21.
  */
 public class MainForm {
