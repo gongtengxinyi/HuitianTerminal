@@ -8,7 +8,6 @@ import com.huitian.util.AppendToFile;
 import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
 import com.huitian.util.ReadFromFile;
-import com.xiaoleilu.hutool.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -822,16 +821,16 @@ public class MainForm {
                 return false;
             }
         };
-        table3.setModel(model);
-        table3.getTableHeader().setResizingAllowed(true);
+//        table3.setModel(model);
+//        table3.getTableHeader().setResizingAllowed(true);
         // 设置列宽
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //得到屏幕的尺寸
         int width = screenSize.width / 3;
-        table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
-        table3.setRowHeight(40);
-        table3.setRowMargin(10);
-        table3.updateUI();
+//        table3.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
+//        table3.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+//        table3.setRowHeight(40);
+//        table3.setRowMargin(10);
+//        table3.updateUI();
 
         DefaultTableModel model1 = new DefaultTableModel(cellData, headerNames) {
             public boolean isCellEditable(int row, int column) {
@@ -841,8 +840,10 @@ public class MainForm {
         table2.setModel(model1);
         table2.getTableHeader().setResizingAllowed(true);
         // 设置列宽
-        table2.getColumnModel().getColumn(0).setPreferredWidth(ConstantsUI.PORTAL_TABLE_COL_WIDTH);
-        table2.getColumnModel().getColumn(0).setMaxWidth(width * 2);
+        table2.getColumnModel().getColumn(0).setPreferredWidth(width);
+        table2.getColumnModel().getColumn(0).setMaxWidth(width);
+        table2.getColumnModel().getColumn(1).setPreferredWidth(width);
+        table2.getColumnModel().getColumn(1).setMaxWidth(width);
         table2.setRowHeight(40);
         table2.setRowMargin(10);
         table2.updateUI();
