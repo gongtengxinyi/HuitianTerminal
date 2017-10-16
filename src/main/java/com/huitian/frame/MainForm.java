@@ -245,6 +245,7 @@ public class MainForm {
                         service1.shutdown();
                     JOptionPane.showMessageDialog(frame,
                             "停止加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
+                    drawNoIndentView();
                     return;
                 } catch (Exception e1) {
 
@@ -733,10 +734,6 @@ public class MainForm {
      */
 
     private void initAfterIndentList(List<IndentDto> indentDtos) {
-        if (indentDtos == null && indentDtos.size() < 1) {
-            initNoWorkIndent();
-            return;
-        }
         // 模板消息Data表
         String[] headerNames = {"业主姓名", "业主手机号", "订单id"};
         java.util.List<String[]> list = new ArrayList<String[]>();
