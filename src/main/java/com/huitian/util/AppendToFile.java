@@ -1,10 +1,33 @@
 package com.huitian.util;
 
+import com.huitian.dto.IndentDto;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class AppendToFile {
+    /**
+     * 订单内容写到文件中
+     * @param fileName
+     * @param indent
+     */
+    public static void appendMethodC(String fileName, IndentDto indent) {
+        try {
+            String line="\\r\\n";
+            // 打开一个随机访问文件流，按读写方式
+            RandomAccessFile randomFile = new RandomAccessFile(fileName, "rw");
+            // 文件长度，字节数
+            long fileLength = randomFile.length();
+            //将写文件指针移到文件尾。
+            randomFile.seek(fileLength);
+            randomFile.writeBytes("");
+            randomFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * A方法追加文件：使用RandomAccessFile
      */

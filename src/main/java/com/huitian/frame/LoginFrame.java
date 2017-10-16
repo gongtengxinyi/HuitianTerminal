@@ -5,6 +5,7 @@ import com.huitian.constants.ConstantsUI;
 import com.huitian.constants.HttpResponseStatus;
 import com.huitian.constants.HuitianResult;
 import com.huitian.service.HttpService;
+import com.huitian.util.FileUtil;
 import com.huitian.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  * Created by dingjianelei on 2017/9/20.
@@ -46,7 +48,7 @@ public class LoginFrame {
                     return;
                 }
                 //创建等待窗体
-               JFrame waitFrame =  initWaitFrame(frame);
+                JFrame waitFrame = initWaitFrame(frame);
                 //如果断网的话给他提示
 //                if (!checkInternet()) {
 //                    waitFrame.dispose();
@@ -233,7 +235,24 @@ public class LoginFrame {
         frame.setContentPane(new LoginFrame().panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        createDefaultDir();
         frame.setVisible(true);
+    }
+
+    /**
+     * 创建默认文件夹
+     */
+    private static void createDefaultDir() {
+        File defaultFile = new File(CacheConstants.file_path_dafault);
+        if (!defaultFile.exists()) {
+            defaultFile.mkdirs();
+        }
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append(CacheConstants.file_path_dafault).append("/").append(CacheConstants.order_file);
+        FileUtil.judgeExistsNoCreateFile(sb2.toString(), CacheConstants.file_path_dafault);
+        Init.configer.setProps(CacheConstants.file_path, CacheConstants.file_path_dafault);
+        Init.configer.save();
+
     }
 
     private void createUIComponents() {

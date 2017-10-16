@@ -11,6 +11,28 @@ import java.io.IOException;
  * Created by Zlyj on 2017/9/25.
  */
 public class FileUtil {
+
+    public  static  File judgeExistsNoCreateFile(String fileNameAndPath,String filePath){
+        File file=null;
+        try {
+         file = new File(fileNameAndPath);
+            if(file.exists()){
+                return  file;
+            }
+            else{
+                File fileP = new File(filePath);
+                if(!fileP.exists()){
+                    fileP.mkdirs();
+                }
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+
+    }
+
     public static boolean changeDir() {
         boolean res = true;
         try {

@@ -28,6 +28,7 @@ public class ReadFromFile {
      * 以行为单位读取文件，常用于读面向行的格式化文件
      */
     public static void readFileByLines(String fileName, WebSocketClient webSocketClient) {
+
         File file = new File(fileName);
         if (!file.exists()) {
             try {

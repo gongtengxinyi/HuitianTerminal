@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.net.URI;
 import java.nio.channels.NotYetConnectedException;
 import java.util.*;
@@ -309,13 +310,17 @@ public class MainForm {
     private void startThreadFindSingleWork() {
         Runnable runnable1 = new Runnable() {
             public void run() {
-                String filename = "";
-                if (StringUtils.isBlank(Init.configer.getProps(CacheConstants.file_path))) {
-                    filename = CacheConstants.file_path_dafault;
-                } else {
-                    filename = Init.configer.getProps(CacheConstants.file_path);
+
+                String filename = CacheConstants.judge_dir + CacheConstants.judge_file;
+                File file = new File(filename);
+                File fileDir = new File(CacheConstants.judge_dir);
+                try {
+                    if (!file.exists()) {
+                        fileDir.mkdirs();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                filename = filename + "/" + CacheConstants.judge_file;
                 ReadFromFile.readFileByLines(filename, webSocketClient);
             }
         };
@@ -799,9 +804,27 @@ public class MainForm {
             filePath = Init.configer.getProps(CacheConstants.file_path);
         }
         sb.append(filePath).append("/").append(CacheConstants.file_name).append(CacheConstants.file_suffix);
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append(CacheConstants.file_path_dafault).append("/").append(CacheConstants.order_file);
+        if (chatMessage == null) {
+            return;
+        }
+        String indentDto = chatMessage.getMessage();
+        IndentDto indent = JsonUtils.jsonToPojo(indentDto, IndentDto.class);
+        if (indent == null) {
+            return;
+        }
+        downLoadImg();
         ReadFromFile.clearInfoForFile(sb.toString());
-        String s = JsonUtils.objectToJson(chatMessage);
-        AppendToFile.appendMethodA(sb.toString(), s);
+        FileUtil.judgeExistsNoCreateFile(sb2.toString(), CacheConstants.file_path_dafault);
+        AppendToFile.appendMethodC(sb.toString(), indent);
+        AppendToFile.appendMethodA(sb2.toString(), indent.getIndentId());
+    }
+
+    /**
+     * ftp下载图片
+     */
+    private void downLoadImg() {
     }
 
     /**
