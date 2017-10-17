@@ -4,7 +4,7 @@ package com.huitian.constants;
  * *Created by IntelliJ IDEA.
  * *User: 丁建磊
  * *create in 22:41 2017/9/24
- * *content:
+ * *content:订单
  */
 public class CacheConstants {
     //存储全局id
