@@ -51,7 +51,7 @@ public class ReadFromFile {
 
                     ChatMessage chatMessage = null;
                     try {
-                        chatMessage = MainForm.createChatMessage(EnumMessageMode.START_MACHINE.name());
+                        chatMessage = MainForm.createChatMessage(EnumMessageMode.GET_MORE.name());
                         String lowDpiKey = JsonUtils.objectToJson(chatMessage);
                         webSocketClient.send(lowDpiKey);
                         clearInfoForFile(fileName);

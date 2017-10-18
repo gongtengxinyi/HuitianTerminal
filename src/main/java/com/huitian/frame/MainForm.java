@@ -226,7 +226,11 @@ public class MainForm {
                 ChatMessage chatMessage = createChatMessage(EnumMessageMode.START_MACHINE.name());
                 String lowDpiKey = JsonUtils.objectToJson(chatMessage);
                 webSocketClient.send(lowDpiKey);
-                startThreadFindSingleWork();
+                try {
+                    startThreadFindSingleWork();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
                 JOptionPane.showMessageDialog(frame,
                         "开始加工！", "绘天科技", JOptionPane.INFORMATION_MESSAGE);
                 return;
@@ -245,7 +249,7 @@ public class MainForm {
                         service1.shutdown();
                     JOptionPane.showMessageDialog(frame,
                             "停止加工！", "Sorry~", JOptionPane.INFORMATION_MESSAGE);
-                    drawNoIndentView();
+//                    drawNoIndentView();
                     return;
                 } catch (Exception e1) {
 
@@ -344,19 +348,33 @@ public class MainForm {
                     String indentId = indent.getIndentId();
                     String picType = indent.getPicType();
                     String picCode = indent.getPicCode();
-                    String piCount = indent.getPicCount();
+
+                    double xlong=indent.getxLongToZero();
+                    double ylong=indent.getyLongToZero();
+                    double zZoom=indent.getZoom();
+                    double zSpin=indent.getzSpin();
                     String[] str = {"姓名", name};
                     String[] str1 = {"手机号", mobile};
                     String[] str2 = {"订单编号", indentId};
                     String[] str3 = {"图案类型", picType};
                     String[] str4 = {"图案编码", picCode};
-                    String[] str5 = {"图案数量", piCount};
+
+                    String[] str6 = {"x轴距离原点距离", String.valueOf(xlong)};
+                    String[] str7 = {"y轴距离原点距离", String.valueOf(ylong)};
+                    String[] str8 = {"z轴旋转角度", String.valueOf(zSpin)};
+                    String[] str9 = {"放大缩小", String.valueOf(zZoom)};
+
+
                     list.add(str);
                     list.add(str1);
                     list.add(str2);
                     list.add(str3);
                     list.add(str4);
-                    list.add(str5);
+
+                    list.add(str6);
+                    list.add(str7);
+                    list.add(str8);
+                    list.add(str9);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -654,7 +672,8 @@ public class MainForm {
 
 
                 public void onOpen(ServerHandshake handshake) {
-
+                    //连接服务器之后就进行扫描文件
+                    startThreadFindSingleWork();
                     System.out.println("窗体初始化，websocket连接成功 onopen"
                     );
                 }
@@ -814,7 +833,9 @@ public class MainForm {
         downLoadImg();
         ReadFromFile.clearInfoForFile(sb.toString());
         FileUtil.judgeExistsNoCreateFile(sb2.toString(), CacheConstants.file_path_dafault);
+
         AppendToFile.appendMethodC(sb.toString(), indent);
+        ReadFromFile.clearInfoForFile(sb2.toString());
         AppendToFile.appendMethodA(sb2.toString(), indent.getIndentId());
     }
 
