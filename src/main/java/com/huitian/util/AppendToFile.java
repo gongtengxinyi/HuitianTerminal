@@ -1,10 +1,12 @@
 package com.huitian.util;
 
 import com.huitian.dto.IndentDto;
+import com.huitian.dto.Param;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 public class AppendToFile {
     /**
@@ -16,9 +18,14 @@ public class AppendToFile {
         try {
 
             StringBuilder sb =new StringBuilder();
-            sb.append(indent.getPicName()).append(".DXF").append(",").append(indent.getxLongToZero()).append(",")
-                    .append(indent.getyLongToZero()).append(",")
-                    .append(indent.getzSpin()).append(",").append(indent.getZoom()).append("\r\n");
+            List<Param> params = indent.getParam();
+            for (Param param : params) {
+                sb.append(param.getPicName()).append(".DXF").append(",").append(param.getxLongToZero()).append(",")
+                        .append(param.getyLongToZero()).append(",")
+                        .append(param.getzSpin()).append(",").append(param.getZoom()).append("\r\n");
+            }
+
+
             // 打开一个随机访问文件流，按读写方式
             RandomAccessFile randomFile = new RandomAccessFile(fileName, "rw");
             // 文件长度，字节数

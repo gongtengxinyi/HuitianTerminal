@@ -2,6 +2,7 @@ package com.huitian.frame;
 
 import com.huitian.constants.*;
 import com.huitian.dto.IndentDto;
+import com.huitian.dto.Param;
 import com.huitian.pojo.ChatMessage;
 import com.huitian.service.HttpService;
 import com.huitian.util.AppendToFile;
@@ -341,40 +342,43 @@ public class MainForm {
         if (chatMessage != null) {
             String indentDto = chatMessage.getMessage();
             IndentDto indent = JsonUtils.jsonToPojo(indentDto, IndentDto.class);
+
             try {
                 if (indent != null) {
                     String name = indent.getReceiverName();
                     String mobile = indent.getReceiverMobile();
                     String indentId = indent.getIndentId();
-                    String picType = indent.getPicType();
-                    String picCode = indent.getPicCode();
-
-                    double xlong=indent.getxLongToZero();
-                    double ylong=indent.getyLongToZero();
-                    double zZoom=indent.getZoom();
-                    double zSpin=indent.getzSpin();
                     String[] str = {"姓名", name};
                     String[] str1 = {"手机号", mobile};
                     String[] str2 = {"订单编号", indentId};
-                    String[] str3 = {"图案类型", picType};
-                    String[] str4 = {"图案编码", picCode};
-
-                    String[] str6 = {"x轴距离原点距离", String.valueOf(xlong)};
-                    String[] str7 = {"y轴距离原点距离", String.valueOf(ylong)};
-                    String[] str8 = {"z轴旋转角度", String.valueOf(zSpin)};
-                    String[] str9 = {"放大缩小", String.valueOf(zZoom)};
-
-
                     list.add(str);
                     list.add(str1);
                     list.add(str2);
-                    list.add(str3);
-                    list.add(str4);
+                    List<Param> params = indent.getParam();
+                    for (Param param : params) {
+                        String picType = param.getPicType();
+                        String picCode = param.getPicCode();
+                        double xlong = param.getxLongToZero();
+                        double ylong = param.getyLongToZero();
+                        double zZoom = param.getZoom();
+                        double zSpin = param.getzSpin();
+                        String[] str10 = {"＜标准图形＞ ☞ →", "▼"};
+                        String[] str3 = {"图案类型", picType};
+                        String[] str4 = {"图案编码", picCode};
+                        String[] str6 = {"x轴距离原点距离", String.valueOf(xlong)};
+                        String[] str7 = {"y轴距离原点距离", String.valueOf(ylong)};
+                        String[] str8 = {"z轴旋转角度", String.valueOf(zSpin)};
+                        String[] str9 = {"放大缩小", String.valueOf(zZoom)};
+                        list.add(str10);
+                        list.add(str3);
+                        list.add(str4);
+                        list.add(str6);
+                        list.add(str7);
+                        list.add(str8);//
+                        list.add(str9);
 
-                    list.add(str6);
-                    list.add(str7);
-                    list.add(str8);
-                    list.add(str9);
+                    }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -831,6 +835,8 @@ public class MainForm {
             return;
         }
         downLoadImg();
+
+        FileUtil.judgeExistsNoCreateFile(sb.toString(), CacheConstants.file_path_dafault);
         ReadFromFile.clearInfoForFile(sb.toString());
         FileUtil.judgeExistsNoCreateFile(sb2.toString(), CacheConstants.file_path_dafault);
 
